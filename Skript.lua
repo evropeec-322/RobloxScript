@@ -42,7 +42,7 @@ ToggleGui.Parent = game.CoreGui
 
 Toggle.Name = "Toggle"
 Toggle.Parent = ToggleGui
-Toggle.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+Toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 Toggle.BackgroundTransparency = 0.660
 Toggle.Position = UDim2.new(0, 0, 0.454706937, 0)
 Toggle.Size = UDim2.new(0.0650164187, 0, 0.0888099447, 0)
