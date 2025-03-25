@@ -10,30 +10,29 @@ Credits to the Owner Who Made The Hitbox Script
 
 local CoreGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 
 local function isNumber(str)
-  if tonumber(str) ~= nil or str == 'inf' then
-    return true
-  end
+    return tonumber(str) ~= nil or str == "inf"
 end
 
+--// Global Settings
 getgenv().HitboxSize = 15
 getgenv().HitboxTransparency = 0.9
-
 getgenv().HitboxStatus = false
 getgenv().TeamCheck = false
-
-getgenv().Walkspeed = game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed
-getgenv().Jumppower = game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower
-
+getgenv().Walkspeed = Humanoid and Humanoid.WalkSpeed or 16
+getgenv().Jumppower = Humanoid and Humanoid.JumpPower or 50
 getgenv().TPSpeed = 3
 getgenv().TPWalk = false
 
 --// UI
-
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/UI-Library/main/Source/MyUILib(Unamed).lua"))();
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/UI-Library/main/Source/MyUILib(Unamed).lua"))()
 local Window = Library:Create("Hitbox Expander")
 
+--// Toggle UI Button
 local ToggleGui = Instance.new("ScreenGui")
 local Toggle = Instance.new("TextButton")
 
@@ -43,199 +42,106 @@ ToggleGui.Parent = game.CoreGui
 Toggle.Name = "Toggle"
 Toggle.Parent = ToggleGui
 Toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-Toggle.BackgroundTransparency = 0.660
-Toggle.Position = UDim2.new(0, 0, 0.454706937, 0)
-Toggle.Size = UDim2.new(0.0650164187, 0, 0.0888099447, 0)
+Toggle.BackgroundTransparency = 0.66
+Toggle.Position = UDim2.new(0, 0, 0.45, 0)
+Toggle.Size = UDim2.new(0.065, 0, 0.088, 0)
 Toggle.Font = Enum.Font.SourceSans
 Toggle.Text = "Toggle"
 Toggle.TextScaled = true
 Toggle.TextColor3 = Color3.fromRGB(40, 40, 40)
-Toggle.TextSize = 24.000
-Toggle.TextXAlignment = Enum.TextXAlignment.Left
 Toggle.Active = true
 Toggle.Draggable = true
-Toggle.MouseButton1Click:connect(function()
+Toggle.MouseButton1Click:Connect(function()
     Library:ToggleUI()
 end)
 
-local HomeTab = Window:Tab("Home","rbxassetid://10888331510")
-local PlayerTab = Window:Tab("Players","rbxassetid://12296135476")
-local VisualTab = Window:Tab("Visuals","rbxassetid://12308581351")
+--// Functions
+local function updateHitbox()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = player.Character.HumanoidRootPart
+            if getgenv().HitboxStatus and (not getgenv().TeamCheck or player.Team ~= LocalPlayer.Team) then
+                hrp.Size = Vector3.new(getgenv().HitboxSize, getgenv().HitboxSize, getgenv().HitboxSize)
+                hrp.Transparency = getgenv().HitboxTransparency
+                hrp.BrickColor = BrickColor.new("Really black")
+                hrp.Material = Enum.Material.Neon
+                hrp.CanCollide = false
+            else
+                hrp.Size = Vector3.new(2, 2, 1)
+                hrp.Transparency = 1
+                hrp.BrickColor = BrickColor.new("Medium stone grey")
+                hrp.Material = Enum.Material.Plastic
+                hrp.CanCollide = false
+            end
+        end
+    end
+end
 
-HomeTab:InfoLabel("only works on some games!")
+RunService.RenderStepped:Connect(updateHitbox)
 
-HomeTab:Section("Settings")
+--// UI Elements
+local HomeTab = Window:Tab("Home", "rbxassetid://10888331510")
+local PlayerTab = Window:Tab("Players", "rbxassetid://12296135476")
 
-HomeTab:TextBox("Hitbox Size", function(value)
-    getgenv().HitboxSize = value
-end)
-
-HomeTab:TextBox("Hitbox Transparency", function(number)
-    getgenv().HitboxTransparency = number
-end)
-
-HomeTab:Section("Main")
-
-HomeTab:Toggle("Status: ", function(state)
-	getgenv().HitboxStatus = state
-    game:GetService('RunService').RenderStepped:connect(function()
-		if HitboxStatus == true and TeamCheck == false then
-			for i,v in next, game:GetService('Players'):GetPlayers() do
-				if v.Name ~= game:GetService('Players').LocalPlayer.Name then
-					pcall(function()
-						v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
-						v.Character.HumanoidRootPart.Transparency = HitboxTransparency
-						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really black")
-						v.Character.HumanoidRootPart.Material = "Neon"
-						v.Character.HumanoidRootPart.CanCollide = false
-					end)
-				end
-			end
-		elseif HitboxStatus == true and TeamCheck == true then
-			for i,v in next, game:GetService('Players'):GetPlayers() do
-				if game:GetService('Players').LocalPlayer.Team ~= v.Team then
-					pcall(function()
-						v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
-						v.Character.HumanoidRootPart.Transparency = HitboxTransparency
-						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really black")
-						v.Character.HumanoidRootPart.Material = "Neon"
-						v.Character.HumanoidRootPart.CanCollide = false
-					end)
-				end
-			end
-		else
-		    for i,v in next, game:GetService('Players'):GetPlayers() do
-				if v.Name ~= game:GetService('Players').LocalPlayer.Name then
-					pcall(function()
-						v.Character.HumanoidRootPart.Size = Vector3.new(2,2,1)
-						v.Character.HumanoidRootPart.Transparency = 1
-						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Medium stone grey")
-						v.Character.HumanoidRootPart.Material = "Plastic"
-						v.Character.HumanoidRootPart.CanCollide = false
-					end)
-				end
-			end
-		end
-	end)
+HomeTab:Toggle("Hitbox Status", function(state)
+    getgenv().HitboxStatus = state
 end)
 
 HomeTab:Toggle("Team Check", function(state)
     getgenv().TeamCheck = state
 end)
 
-HomeTab:Keybind("Toggle UI", Enum.KeyCode.F, function()
-    Library:ToggleUI()
+HomeTab:TextBox("Hitbox Size", function(value)
+    getgenv().HitboxSize = tonumber(value) or 15
+end)
+
+HomeTab:TextBox("Hitbox Transparency", function(value)
+    getgenv().HitboxTransparency = tonumber(value) or 0.9
 end)
 
 PlayerTab:TextBox("WalkSpeed", function(value)
-    getgenv().Walkspeed = value
-    pcall(function()
-        game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = value
-    end)
+    getgenv().Walkspeed = tonumber(value) or 16
+    if Humanoid then
+        Humanoid.WalkSpeed = getgenv().Walkspeed
+    end
 end)
 
 PlayerTab:Toggle("Loop WalkSpeed", function(state)
     getgenv().loopW = state
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if loopW == true then
-            pcall(function()
-                game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = Walkspeed
-            end)
+    RunService.Heartbeat:Connect(function()
+        if getgenv().loopW and Humanoid then
+            Humanoid.WalkSpeed = getgenv().Walkspeed
         end
     end)
 end)
 
 PlayerTab:TextBox("JumpPower", function(value)
-    getgenv().Jumppower = value
-    pcall(function()
-        game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = value
-    end)
+    getgenv().Jumppower = tonumber(value) or 50
+    if Humanoid then
+        Humanoid.JumpPower = getgenv().Jumppower
+    end
 end)
 
 PlayerTab:Toggle("Loop JumpPower", function(state)
     getgenv().loopJ = state
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if loopJ == true then
-            pcall(function()
-                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = Jumppower
-            end)
+    RunService.Heartbeat:Connect(function()
+        if getgenv().loopJ and Humanoid then
+            Humanoid.JumpPower = getgenv().Jumppower
         end
     end)
 end)
 
-PlayerTab:TextBox("TP Speed", function(value)
-getgenv().TPSpeed = value
-end)
-
-PlayerTab:Toggle("TP Walk", function(s)
-getgenv().TPWalk = s
-local hb = game:GetService("RunService").Heartbeat
-local player = game:GetService("Players")
-local lplr = player.LocalPlayer
-local chr = lplr.Character
-local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
-while getgenv().TPWalk and hb:Wait() and chr and hum and hum.Parent do
-  if hum.MoveDirection.Magnitude > 0 then
-    if getgenv().TPSpeed and isNumber(getgenv().TPSpeed) then
-      chr:TranslateBy(hum.MoveDirection * tonumber(getgenv().TPSpeed))
-    else
-      chr:TranslateBy(hum.MoveDirection)
-    end
-  end
-end
-end)
-
-PlayerTab:Slider("Fov", game.Workspace.CurrentCamera.FieldOfView,120, function(v)
-     game.Workspace.CurrentCamera.FieldOfView = v
-end)
-
-PlayerTab:Toggle("Noclip", function(s)
-    getgenv().Noclip = s
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if Noclip == true then
-            game:GetService("RunService").Stepped:wait()
-            game.Players.LocalPlayer.Character.Head.CanCollide = false
-            game.Players.LocalPlayer.Character.Torso.CanCollide = false
-        end
-    end)
-end)
-
-PlayerTab:Toggle("Infinite Jump", function(s)
-getgenv().InfJ = s
-    game:GetService("UserInputService").JumpRequest:connect(function()
-        if InfJ == true then
-            game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
+PlayerTab:Toggle("Infinite Jump", function(state)
+    getgenv().InfJ = state
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if getgenv().InfJ and Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end)
 end)
 
 PlayerTab:Button("Rejoin", function()
-    game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+    game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
 end)
 
-VisualTab:InfoLabel("Wait 3-10 seconds")
-
-VisualTab:Toggle("Character Highlight", function(state)
-getgenv().enabled = state --Toggle on/off
-getgenv().filluseteamcolor = true --Toggle fill color using player team color on/off
-getgenv().outlineuseteamcolor = true --Toggle outline color using player team color on/off
-getgenv().fillcolor = Color3.new(0, 0, 0) --Change fill color, no need to edit if using team color
-getgenv().outlinecolor = Color3.new(1, 1, 1) --Change outline color, no need to edit if using team color
-getgenv().filltrans = 0.5 --Change fill transparency
-getgenv().outlinetrans = 0.5 --Change outline transparency
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/RobloxScripts/main/Highlight-ESP.lua"))()
-end)
-
-if game.PlaceId == 3082002798 then
-    local GamesTab = Window:Tab("Games","rbxassetid://15426471035")
-	GamesTab:InfoLabel("Game: "..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
-	GamesTab:Button("No Cooldown", function()
-	    for i, v in pairs(game:GetService('ReplicatedStorage')['Shared_Modules'].Tools:GetDescendants()) do
-		    if v:IsA('ModuleScript') then
-			    local Module = require(v)
-				Module.DEBOUNCE = 0
-			end
-		end
-	end)
-end
+print("Optimized script loaded!") 
